@@ -8,32 +8,35 @@ from math import pow
 def _shRNA_prod(lacI, parameters):
     lacI_k_I_1 = 700
     tetR_k_I = 7000
-    cI_k_I = 7000
+    xylR_k_I = 7000
 
-    tetR_prod_1, \
-      tetR_prod_2, \
-      cI_prod = parameters
+    tetR_prod_1 = 14000
+    tetR_prod_2 = 14000
+    xylR_prod   = 14000
 
     lacI_k_I_2 = lacI_k_I_1 * 15
 
     tetR_n = 2
     lacI_n = 2
-    cI_n = 2
+    xylR_n = 5
 
-    tetR_1 = tetR_prod_1 * (1 / (1 + pow(lacI / lacI_k_I_1, lacI_n)) + 0.001)
-    cI = cI_prod * (1 / (1 + pow(lacI / lacI_k_I_2, lacI_n)) + 0.001)
-    tetR_2 = tetR_prod_2 * (1 / (1 + pow(cI / cI_k_I, cI_n)) + 0.001)
+    tetR_1 = tetR_prod_1 * (1 / (1 + pow(lacI / lacI_k_I_1, lacI_n)) + 0.01)
+    xylR =   xylR_prod   * (1 / (1 + pow(lacI / lacI_k_I_2, lacI_n)) + 0.01)
+    tetR_2 = tetR_prod_2 * (1 / (1 + pow(xylR / xylR_k_I, xylR_n))   + 0.01)
     tetR = tetR_1 + tetR_2
     sh_prod = 1 / (1 + pow(tetR / tetR_k_I, tetR_n))
 
-    return sh_prod, tetR_1, cI, tetR_2
+    return sh_prod, tetR_1, xylR, tetR_2
 
 def _gen_parameters():
-    from itertools import permutations
-    return permutations(
-        [i * pow(10, 2) for i in xrange(1, 10)] +
-        [i * pow(10, 3) for i in xrange(1, 15)] +
-        [], 4)
+    yield [7000]
+    # from itertools import permutations
+    # for lacI in xrange(800, 7500, 200):
+    #     for rest in permutations(
+    #         [i * pow(10, 2) for i in xrange(1, 20, 1)] +
+    #         [i * pow(10, 3) for i in xrange(2, 15, 1)] +
+    #         [], 0):
+    #         yield [lacI] + list(rest)
 
 def _score_shs(sh_prods):
     return (min(sh_prods[2:5]) / max(sh_prods[0:2] + sh_prods[5:])) if sh_prods[3] > 0.8 else 0
@@ -47,7 +50,10 @@ def _lac_range(med):
 
 def _print_data(lac_range, parameters):
     for i in xrange(min(lac_range), max(lac_range) + 1, (max(lac_range) - min(lac_range)) // 20):
-        print i, zip(_shRNA_prod(i, parameters), ["shRNA", "TetR 1", "cI", "tetR 2"])
+        print "lacI: {:6} =>".format(i),
+        for name, conc in zip(["shRNA", "TetR 1", "xylR", "tetR 2"], _shRNA_prod(i, parameters)):
+            print "{}: {:7.1f},    ".format(name, conc),
+        print
 
 def _main(args):
     med = 1500
@@ -58,7 +64,7 @@ def _main(args):
     lac_range = _lac_range(med)
     best = best[1:]
     print "lac_range:", lac_range
-    print "best parameters:", zip(["tetR1 v_max:", "tetR2 v_max:", "cI v_max:"], map(int, best))
+    # print "best parameters:", zip(["tetR1 v_max:", "tetR2 v_max:", "xylR v_max:", "tetR 2 k_I"], map(int, best))
     print "score:", _score_shs([_shRNA_prod(i, best)[0] for i in lac_range])
     print
 
