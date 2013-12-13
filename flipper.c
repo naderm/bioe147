@@ -102,6 +102,9 @@ int main(int argc, char **argv) {
 	printf("    distance: Max number of fragments that can be flipped by\n");
 	printf("              a recombinase. If 0, no limit to fragment size.\n");
 	printf("    particles: Number of samples to run (Ideally > 2^m * m!)\n");
+	printf("\n");
+	printf("Remember, this program uses 4 * particles * m bytes of memory\n");
+	printf("\n");
 	exit(1);
   }
 
@@ -113,6 +116,11 @@ int main(int argc, char **argv) {
 
   particles = malloc(particle_count * m * sizeof(int));
   start = malloc(m * sizeof(int));
+
+  if (particles == NULL || start == NULL) {
+	fprintf(stderr, "Error: Unable to allocate memory for particles!\n");
+	exit(1);
+  }
 
   for (size_t j = 0; j < m; j++)
 	start[j] = j + 1;
