@@ -1,3 +1,28 @@
+/* Copyright (c) 2013, Nader Morshed
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,8 +33,11 @@ typedef int bool;
 #define TRUE 1
 #define FALSE 0
 
-size_t M = 7;
+size_t M;
 
+/* Flip the elements of lst in place between the left and right indices and
+   negate their values
+*/
 void flip(int *lst, int left, int right) {
   while (left < right) {
 	int tmp = -lst[left];
@@ -20,6 +48,9 @@ void flip(int *lst, int left, int right) {
   }
 }
 
+/* Randomly pick a segment within lst to flip in place. This segment may have a
+   length of zero, in which case, nothing happens.
+*/
 void rand_flip(int *lst) {
   int left, right;
   left = rand() / (RAND_MAX / (M + 1) + 1);
@@ -34,6 +65,8 @@ void rand_flip(int *lst) {
   flip(lst, left, right);
 }
 
+/* Shuffles and randomly negates the values of lst in place.
+ */
 void shuffle_and_flip(int *lst) {
   for (size_t i = 0; i < M; i++) {
 	size_t j = i + rand() / (RAND_MAX / (M - i) + 1);
@@ -47,30 +80,37 @@ void shuffle_and_flip(int *lst) {
 }
 
 
-int main() {
-  size_t particle_count = 10000000;
+int main(int argc, char **argv) {
+  size_t particle_count;
   int *particles, *start;
+
+  if (argc != 3) {
+	printf("Usage: flipper [m] [particles]\n");
+	printf("    m: Number of edges in graph\n");
+	printf("    particles: Number of samples to run (Ideally > 2^m * m!)\n");
+	exit(1);
+  }
+
+  M = atoi(argv[1]);
+  particle_count = atoi(argv[2]);
 
   srand(time(NULL));
 
   particles = malloc(particle_count * M * sizeof(int));
   start = malloc(M * sizeof(int));
 
-  for (size_t j = 0; j < M; j++) {
+  for (size_t j = 0; j < M; j++)
 	start[j] = j + 1;
-  }
+
   shuffle_and_flip(start);
 
-  for (size_t i = 0; i < particle_count; i++) {
+  /* Copy the starting particle over every sample */
+  for (size_t i = 0; i < particle_count; i++)
 	memcpy(particles + i * M, start, M * sizeof(int));
-	/* for (size_t j = 0; j < M; j++) { */
-	/*   particles[i * M + j] = j + 1; */
-	/* } */
-	/* shuffle_and_flip(particles + i * M); */
-  }
 
   free(start);
 
+  /* Repeatedly sample the problem space */
   for (size_t iter = 1; iter < 100; iter++) {
 	size_t count = 0;
 
@@ -78,11 +118,13 @@ int main() {
 
 	for (size_t i = 0; i < particle_count; i++) {
 	  bool correct = TRUE;
+	  int *particle = particles + i * M;
 
-	  rand_flip(particles + i * M);
+	  /* Randomly flip the particle in place */
+	  rand_flip(particle);
 
 	  for (size_t j = 0; j < M; j++) {
-		if (particles[i * M + j] != j + 1) {
+		if (particle[j] != j + 1) {
 		  correct = FALSE;
 		  break;
 		}
@@ -92,6 +134,7 @@ int main() {
 		count++;
 	}
 
+	/* Count the number of particles in the correct configuration */
 	printf("Ratio: %f %%\n", ((float) count) / particle_count * 100);
   }
 
