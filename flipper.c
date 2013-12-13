@@ -79,7 +79,7 @@ void shuffle_and_flip(int *lst) {
   }
 }
 
-
+/* Compile on linux with: gcc -std=c99 -O2 flipper.c -o flipper */
 int main(int argc, char **argv) {
   size_t particle_count;
   int *particles, *start;
