@@ -98,9 +98,9 @@ int main(int argc, char **argv) {
 
   if (argc != 4) {
 	printf("Usage: flipper [m] [distance] [particles]\n");
-	printf("    m: Number of edges in graph\n");
-	printf("    distance: Max number of fragments that can be flipped by\n");
-	printf("              a recombinase. If 0, no limit to fragment size.\n");
+	printf("    m:         Number of edges in graph\n");
+	printf("    distance:  Max number of fragments that can be flipped by\n");
+	printf("               a recombinase. If 0, no limit to fragment size.\n");
 	printf("    particles: Number of samples to run (Ideally > 2^m * m!)\n");
 	printf("\n");
 	printf("Remember, this program uses 4 * particles * m bytes of memory\n");
