@@ -32,8 +32,11 @@
 typedef int bool;
 #define TRUE 1
 #define FALSE 0
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-size_t M;
+size_t m;
+int frag_size;
 
 /* Flip the elements of lst in place between the left and right indices and
    negate their values
@@ -48,13 +51,22 @@ void flip(int *lst, int left, int right) {
   }
 }
 
+/* Returns a random integer, a <= int <= b */
+int randint(int a, int b) {
+  return a + rand() / (RAND_MAX / ((b - a) + 1) + 1);
+}
+
 /* Randomly pick a segment within lst to flip in place. This segment may have a
    length of zero, in which case, nothing happens.
 */
 void rand_flip(int *lst) {
   int left, right;
-  left = rand() / (RAND_MAX / (M + 1) + 1);
-  right = rand() % (M + 1);
+  left = randint(0, m);
+
+  if (frag_size == 0)
+	right = randint(0, m);
+  else
+	right = randint(MAX(0, left - frag_size), MIN(m, left + frag_size));
 
   if (left > right) {
 	int tmp = left;
@@ -68,8 +80,8 @@ void rand_flip(int *lst) {
 /* Shuffles and randomly negates the values of lst in place.
  */
 void shuffle_and_flip(int *lst) {
-  for (size_t i = 0; i < M; i++) {
-	size_t j = i + rand() / (RAND_MAX / (M - i) + 1);
+  for (size_t i = 0; i < m; i++) {
+	size_t j = i + rand() / (RAND_MAX / (m - i) + 1);
 	int tmp = lst[i];
 	lst[i] = lst[j];
 	lst[j] = tmp;
@@ -84,29 +96,32 @@ int main(int argc, char **argv) {
   size_t particle_count;
   int *particles, *start;
 
-  if (argc != 3) {
-	printf("Usage: flipper [m] [particles]\n");
+  if (argc != 4) {
+	printf("Usage: flipper [m] [distance] [particles]\n");
 	printf("    m: Number of edges in graph\n");
+	printf("    distance: Max number of fragments that can be flipped by\n");
+	printf("              a recombinase. If 0, no limit to fragment size.\n");
 	printf("    particles: Number of samples to run (Ideally > 2^m * m!)\n");
 	exit(1);
   }
 
-  M = atoi(argv[1]);
-  particle_count = atoi(argv[2]);
+  m = atoi(argv[1]);
+  frag_size = atoi(argv[2]);
+  particle_count = atoi(argv[3]);
 
   srand(time(NULL));
 
-  particles = malloc(particle_count * M * sizeof(int));
-  start = malloc(M * sizeof(int));
+  particles = malloc(particle_count * m * sizeof(int));
+  start = malloc(m * sizeof(int));
 
-  for (size_t j = 0; j < M; j++)
+  for (size_t j = 0; j < m; j++)
 	start[j] = j + 1;
 
   shuffle_and_flip(start);
 
   /* Copy the starting particle over every sample */
   for (size_t i = 0; i < particle_count; i++)
-	memcpy(particles + i * M, start, M * sizeof(int));
+	memcpy(particles + i * m, start, m * sizeof(int));
 
   free(start);
 
@@ -118,12 +133,12 @@ int main(int argc, char **argv) {
 
 	for (size_t i = 0; i < particle_count; i++) {
 	  bool correct = TRUE;
-	  int *particle = particles + i * M;
+	  int *particle = particles + i * m;
 
 	  /* Randomly flip the particle in place */
 	  rand_flip(particle);
 
-	  for (size_t j = 0; j < M; j++) {
+	  for (size_t j = 0; j < m; j++) {
 		if (particle[j] != j + 1) {
 		  correct = FALSE;
 		  break;
