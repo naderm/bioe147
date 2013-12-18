@@ -33,3 +33,5 @@
 *.run.xml
 *.pdf
 *-blx.bib
+*.csv
+*.pyc
