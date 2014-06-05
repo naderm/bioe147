@@ -1,11 +1,11 @@
 \documentclass{article}
 
 \usepackage[left=1in,right=1in,top=1in,bottom=1in]{geometry}
-\usepackage[backend=bibtex8]{biblatex}
+\usepackage[backend=bibtex8,style=nature]{biblatex}
 \addbibresource{proj_desc.bib}
 
 \title{Bioengineering 147: Project Description}
-\author{Nader Morshed \and Nathan Hendel \and Ryan Rezvani}
+\author{Nathan Hendel \and Nader Morshed \and Ryan Rezvani}
 
 \begin{document}
 
@@ -13,7 +13,23 @@
 \thispagestyle{empty}
 \pagestyle{empty}
 
-Ja ja ja
+Nondeterministic polynomial time (NP) problems are difficult for standard computers to solve because their complexity increases rapidly as the size of the problem grows. Equipping bacteria with programmable genetic circuitry allows for immense computing power. A biological computer composed of of billions of bacteria, each running a program in parallel with the others, is far more powerful than a silicon computer. We will focus specifically on the Hamiltonian Path Problem, an NP-complete problem (an NP problem whose solution is difficult to obtain but easy to prove correct) in which a path must be found that starts at the starting node, visits every other node exactly once, and ends at the target node, all along constrained node-to-node paths. We will construct a theoretical framework for a biological system with high computing power that solves the Hamiltonian Path Problem.
+
+In 2009, a group of undergraduates at Missouri Western State University developed a working biological mechanism that solved the Hamiltonian Path Problem for three nodes\cite{Baumgardner2009}. They encoded the graph of the problem into bacterial DNA segments that were shuffled randomly by a Hin/hixC recombination system. They represented their nodes as linked halves of marker genes (RFP and GFP). The correct solutions showed yellow fluorescence, the combination of red and green.
+
+For our project, we wish to address two shortcomings of this bacterial computer. The first task is scale up the circuit to support a graph with more than three nodes. This involves modeling the ability of the recombination enzymes to sample the problem space as the graph size increases. Alongside that, we will investigate how to scale up the circuit using a many-input AND gate, without requiring additional biomarkers for each additional node in the graph. The second task will be to address the issue of the circuit signalling on incorrect solutions to the problem in order to reduce the rate of false positives.
+
+A 2008 paper on the burnt pancake problem found that the Hin/hixC supports fragment sizes of at least between 200-1212 bp and can function at a rate of about 1 DNA flip per minute\cite{Haynes2008}. However, it may be possible to both expand the fragment sizes and the flip rate, either by including extra regulatory enzymes or selecting a new recombinase / target site combo. Other invertases (like Flp/frt and Cre/lox), possess different kinetics and might be more suited to this system than Hin/hixC. We would need to make physical measurements to test the effectiveness of these changes, however in this project we can just create computer models. These models will output the time and number of cells needed to solve the problem given a rate and allowable fragment size. Furthermore, implementation of the system in yeast would best complement the use of the Flp/frt recombinase system, which is both endogenous to the organism and provides the potential for homologous recombination of matching frt sites in order to construct the starting vectors for the experiment.
+
+One unfortunate side effect of the design discussed in the method presented by Baumgardner is that the circuit also will signal on paths that are not correct solutions to the HPP. Within their paper, they calculate that a solution marked as positive has only a 6\% chance of being correct for an example graph with seven vertices\cite{Baumgardner2009}. These false positives quickly eclipse true positives as the size of the graph increases. The only mechanism in place to address this problem in the original system was the use of DNA gels to look for the shortest possible band, which would equal the solution where each node is visited only once. This method quickly becomes difficult to implement when the problem is scaled up to include more nodes, as the optimized path will be in an increasingly tiny minority.
+
+In order to automate this, we must construct a mechanism to check that every gene is expressed in exactly one location on the DNA strand being targeted by the invertases. This means that, for each of those genes, we must implement a low-pass filter that will translate a high input into a high output, but also turn an extra high input into low output. One design for this component uses a simple circuit consisting of a NOT gate combined with an AND gate\cite{Sohka2009}. If we use this circuit, we will need to adapt this circuit to match its low and high cutoffs to our problem.
+
+Previous designs of the bacterial HPP computer were designed to to scale up by means of introducing additional genes to be fragmented and shuffled\cite{Baumgardner2009}. In the original scheme, these genes all produced visual indicators of expression. Our system is based on the use of a series of short hairpin RNAs (shRNAs) that are designed to interfere with the inhibition of a gene necessary for survival. The advantage of such a change is the creation of a live/dead assay, one that is both higher throughput and easier to interpret (as the original paper had many unexpected color combinations show up with just 2 proteins). Elevating the system to 4 proteins, all with a color output, would make downstream interpretation of the output excessively convoluted, thus using shRNAs can allow for a more easily scalable system.
+
+Scaling of the system from 2 to 5 nodes is feasibly with the implementation of an orthogonal set of shRNAs designed for limited crosstalk and co-interference. Thankfully, these biological parts are well characterized, and thus 4 unique shRNAs can be reasonably chosen in such a way that they only act on their own recognition site. Furthermore, either through chemical reasoning or the use of supporting software like SCHEMA, appropriate breakpoints can be chosen for each of the 4 shRNAs such that if the halves of two mismatched RNAs come together, the result has no functionality with any of the existing recognition sequences.
+
+While the described system is essentially a series of modifications to a pre-existing scheme, the possible downstream changes are dramatic enough to warrant a reevaluation of functionality and activity with additional parts in place. By choosing to instead shuffle an assortment of shRNAs that are necessary for the downstream effect of an organism’s survival, a selection mechanism is designed to determine success or failure without the need of additional colorimetric interpretation. By implementing a filter (band pass or low pass) to prevent the revisitation of nodes, the system can be further automated to remove the need for slow electrophoresis assays that would bottleneck experimentation efficiency in the case of larger numbers of nodes. With the streamlining of the circuit designed by Baumgardner, the scaling of the computer from 3 to 5 nodes actually can become a reasonable endeavor, should one choose to verify results via experimentation.
 
 \printbibliography
 

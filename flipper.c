@@ -95,9 +95,11 @@ void shuffle_and_flip(int *lst) {
 int main(int argc, char **argv) {
   size_t particle_count;
   int *particles, *start;
+  int n;
 
-  if (argc != 4) {
-	printf("Usage: flipper [m] [distance] [particles]\n");
+  if (argc != 5) {
+	printf("Usage: flipper [n] [m] [distance] [particles]\n");
+	printf("    n:         Number of nodes in graph\n");
 	printf("    m:         Number of edges in graph\n");
 	printf("    distance:  Max number of fragments that can be flipped by\n");
 	printf("               a recombinase. If 0, no limit to fragment size.\n");
@@ -108,9 +110,10 @@ int main(int argc, char **argv) {
 	exit(1);
   }
 
-  m = atoi(argv[1]);
-  frag_size = atoi(argv[2]);
-  particle_count = atoi(argv[3]);
+  n = atoi(argv[1]);
+  m = atoi(argv[2]);
+  frag_size = atoi(argv[3]);
+  particle_count = atoi(argv[4]);
 
   srand(time(NULL));
 
@@ -146,7 +149,7 @@ int main(int argc, char **argv) {
 	  /* Randomly flip the particle in place */
 	  rand_flip(particle);
 
-	  for (size_t j = 0; j < m; j++) {
+	  for (size_t j = 0; j < n - 1; j++) {
 		if (particle[j] != j + 1) {
 		  correct = FALSE;
 		  break;
